@@ -10,11 +10,13 @@ public class ScriptGUI {
 
     private final JFrame frame;
     private final JComboBox<String> categoryComboBox;
+    private final JPanel skillingPanel;
+    private final JPanel combatPanel;
     private final CardLayout cardLayout;
 
     public ScriptGUI() {
         frame = new JFrame("Runescape Script Config");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 300);
 
         // Dropdown to choose between Combat and Skilling
@@ -26,8 +28,8 @@ public class ScriptGUI {
         frame.add(categoryComboBox, BorderLayout.NORTH);
 
         // Panels for Skilling and Combat
-        JPanel skillingPanel = createSkillingPanel();
-        JPanel combatPanel = createCombatPanel();
+        combatPanel = createCombatPanel();
+        skillingPanel = createSkillingPanel();
 
         // CardLayout to switch between the two panels
         cardLayout = new CardLayout();
@@ -42,40 +44,6 @@ public class ScriptGUI {
 
     public static void initialize() {
         new ScriptGUI();
-    }
-
-    private JPanel createSkillingPanel() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 2));
-
-        JLabel activityLabel = new JLabel("Choose Activity:");
-        String[] activities = {"Woodcutting", "Mining", "Fishing"};
-        JComboBox<String> activityComboBox = new JComboBox<>(activities);
-        activityComboBox.addActionListener(e -> {
-            String activity = (String) activityComboBox.getSelectedItem();
-//            Config.INSTANCE.setSkillingActivity(activity);
-        });
-
-        JLabel treeLabel = new JLabel("Choose Tree:");
-        String[] trees = {"Oak", "Willow", "Yew"};
-        JComboBox<String> treeComboBox = new JComboBox<>(trees);
-        treeComboBox.addActionListener(e -> {
-            String tree = (String) treeComboBox.getSelectedItem();
-//            Config.INSTANCE.setTree(tree);
-        });
-
-        JButton confirmButton = new JButton("Confirm");
-        confirmButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Skilling settings saved.");
-        });
-
-        panel.add(activityLabel);
-        panel.add(activityComboBox);
-        panel.add(treeLabel);
-        panel.add(treeComboBox);
-        panel.add(confirmButton);
-
-        return panel;
     }
 
     private JPanel createCombatPanel() {
@@ -132,6 +100,40 @@ public class ScriptGUI {
         panel.add(foodAmountField);
         panel.add(combatStyleLabel);
         panel.add(combatStyleComboBox);
+        panel.add(confirmButton);
+
+        return panel;
+    }
+
+    private JPanel createSkillingPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(3, 2));
+
+        JLabel activityLabel = new JLabel("Choose Activity:");
+        String[] activities = {"Woodcutting", "Mining", "Fishing"};
+        JComboBox<String> activityComboBox = new JComboBox<>(activities);
+        activityComboBox.addActionListener(e -> {
+            String activity = (String) activityComboBox.getSelectedItem();
+//            Config.INSTANCE.setSkillingActivity(activity);
+        });
+
+        JLabel treeLabel = new JLabel("Choose Tree:");
+        String[] trees = {"Oak", "Willow", "Yew"};
+        JComboBox<String> treeComboBox = new JComboBox<>(trees);
+        treeComboBox.addActionListener(e -> {
+            String tree = (String) treeComboBox.getSelectedItem();
+//            Config.INSTANCE.setTree(tree);
+        });
+
+        JButton confirmButton = new JButton("Confirm");
+        confirmButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(frame, "Skilling settings saved.");
+        });
+
+        panel.add(activityLabel);
+        panel.add(activityComboBox);
+        panel.add(treeLabel);
+        panel.add(treeComboBox);
         panel.add(confirmButton);
 
         return panel;

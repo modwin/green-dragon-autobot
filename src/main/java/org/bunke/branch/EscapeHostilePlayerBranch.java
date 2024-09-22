@@ -17,7 +17,7 @@ public class EscapeHostilePlayerBranch extends Branch implements UtilityMethods 
     }
     @Override
     public boolean isValid() {
-        return Players.all().stream().noneMatch(p -> getLevelDifference(p) && isPlayerKiller(p));
+        return Players.all().stream().anyMatch(p -> getLevelDifference(p) && isPlayerKiller(p));
     }
 
     @Override
