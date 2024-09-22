@@ -18,9 +18,7 @@ public interface UtilityMethods {
     }
     default int computeLootValue(){
         int[] lootValue = new int[1];
-        Inventory.all().stream().filter(Objects::nonNull).forEach(i -> {
-            lootValue[0] =+ LivePrices.get(i);
-        });
+        Inventory.all().stream().filter(Objects::nonNull).forEach(i -> lootValue[0] += LivePrices.get(i));
         return lootValue[0];
     }
     default boolean hasCorrectEquipment(){
@@ -62,11 +60,10 @@ public interface UtilityMethods {
                                 && !npc.getInteractingCharacter().equals(Players.getLocal()))
                 .collect(Collectors.toList());
     }
+
     default boolean attackClosestDragon(){
         Map<Double, NPC> distances = new HashMap<>();
-        getNearbyDragons().forEach(d -> {
-            distances.put(d.getTile().distance(), d);
-        });
+        getNearbyDragons().forEach(d -> distances.put(d.getTile().distance(), d));
         distances.get(Collections.min(distances.keySet())).interact("Attack");
         return true;
     }
