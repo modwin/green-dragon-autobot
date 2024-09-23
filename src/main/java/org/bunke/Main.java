@@ -1,8 +1,9 @@
 package org.bunke;
 
 
+import org.bunke.branch.AntiBanBranch;
 import org.bunke.branch.RootBranch;
-import org.bunke.gui.ScriptGUI;
+import org.bunke.gui.GreenDragonBotGUI;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
 import org.dreambot.api.script.frameworks.treebranch.Root;
@@ -17,7 +18,7 @@ public class Main extends TreeScript {
     @Override
     public void onStart(){
         try {
-            SwingUtilities.invokeAndWait(ScriptGUI::initialize);
+            SwingUtilities.invokeAndWait(GreenDragonBotGUI::initialize);
             Root root = getRoot().addBranches(new RootBranch());
         } catch (InterruptedException | InvocationTargetException e) {
             log(e.getCause());
@@ -27,6 +28,7 @@ public class Main extends TreeScript {
 
     @Override
     public int onLoop(){
+
         return getRoot().onLoop();
     }
 
