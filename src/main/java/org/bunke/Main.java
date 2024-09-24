@@ -12,8 +12,10 @@ import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.methods.skills.SkillTracker;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
+import org.dreambot.api.script.frameworks.treebranch.Root;
 import org.dreambot.api.script.frameworks.treebranch.TreeScript;
 import org.dreambot.api.script.listener.PaintListener;
+import org.dreambot.api.utilities.Timer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,22 +28,31 @@ import java.util.Arrays;
 @Data
 public class Main extends TreeScript implements PaintListener {
 
+    private GreenDragonBotGUI gui;
+    private int lootTracker;
+    private Timer timer = new Timer();
 
     @Override
     public void onPaint(Graphics graphics) {
+        graphics.drawString(getCurrentLeafName(), 25 , 36);
         Skill skillTrained = getSkillTrained();
+        int profitTracker = getLootTracker();
         if(skillTrained != null && getSkillTrained() == skillTrained){
-            graphics.drawString(getCurrentLeafName(), 25 , 36);
             graphics.drawString(skillTrained.name() + " XP/HR  =  " + SkillTracker.getGainedExperiencePerHour(getSkillTrained()), 27, 55);
+            graphics.drawString("TOTAL PROFIT = " + profitTracker, 27, 95);
+            graphics.drawString("GP/HR = " + timer.getHourlyRate(profitTracker), 27, 75);
+//            super.onPaint(graphics);
         }
+        else graphics.drawString("No data yet", 27, 55);
     }
 
     @Override
     public void onStart(){
         try {
+            timer.start();
             SkillTracker.start(Skill.STRENGTH, Skill.RANGED, Skill.ATTACK, Skill.DEFENCE, Skill.HITPOINTS);
-            SwingUtilities.invokeAndWait(GreenDragonBotGUI::initialize);
-            getRoot().addBranches(new RootBranch());
+            SwingUtilities.invokeAndWait(GreenDragonBotGUI::new);
+            Root root = getRoot().addBranches(new RootBranch());
         } catch (InterruptedException | InvocationTargetException e) {
             log(e.getCause());
             throw new RuntimeException(e);
@@ -72,10 +83,6 @@ public class Main extends TreeScript implements PaintListener {
         }
     }
 
-    public void onPause(){
-
-    }
-
     @Override
     public int onLoop(){
 
@@ -83,8 +90,7 @@ public class Main extends TreeScript implements PaintListener {
         if(Config.INSTANCE.getAttackStyle() != null){
             setCombatStyle();
         }
-//        String leafName = getCurrentLeafName();
-//        if(leafName != null && leafName.equals("LootLeaf"));
+
         return getRoot().onLoop();
     }
 
@@ -98,12 +104,13 @@ public class Main extends TreeScript implements PaintListener {
         return skills[0];
     }
 
-//    private void trackLoot(){
-//        HashSet<GroundItem> items = new HashSet<>();
-//        GroundItems.all().stream().filter(i -> (((Players.getLocal().getSurroundingArea(10).contains(i.getTile())) && LivePrices.get(i.getItem()) > 1300 || i.getName().equals("Looting bag"))
-//                        && (Players.getLocal().getSurroundingArea(10).contains(i.getTile()))))
-//                .distinct()
-//                .forEach(i -> profitTracker += LivePrices.get(i.getItem()));
-//    }
+
+    public void onPause(){
+
+    }
+
+    public void onExit(){
+        gui.close();
+    }
 
 }

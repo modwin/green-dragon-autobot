@@ -71,6 +71,7 @@ public class GreenDragonBotGUI {
         frame.add(attackStyleComboBox);
         frame.add(confirmButton);
 
+
         frame.setVisible(true);
         isInitialized = true;  // Set initialization flag
     }
@@ -81,16 +82,16 @@ public class GreenDragonBotGUI {
         return isInitialized;
     }
 
+    public void close(){
+        frame.dispose();;
+    }
+
     // Main method to launch GUI
-    public static void initialize() {
+    public void initialize() {
         if (!isInitialized) {
             SwingUtilities.invokeLater(GreenDragonBotGUI::new);
         } else {
             System.out.println("The GUI is already initialized.");
         }
-    }
-
-    public static void main(String[] args) {
-        initialize();  // Call to launch the GUI
     }
 }

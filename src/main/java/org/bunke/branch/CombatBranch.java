@@ -13,14 +13,19 @@ import static org.dreambot.api.utilities.Logger.log;
 public class CombatBranch extends Branch implements UtilityMethods {
 
     public CombatBranch() {
-        addLeaves(new AttackDragonLeaf(), new WalkToTrainingAreaBranch(), new EatFoodLeaf(), new WorldSwitchLeaf(), new LootLeaf());
+        addLeaves(
+                new AttackDragonLeaf(),
+                new WalkToTrainingAreaBranch(),
+                new EatFoodLeaf(),
+                new WorldSwitchLeaf(),
+                new LootLeaf());
     }
 
 
 
     @Override
     public int onLoop() {
-
+        log("CombatBranch.isValid() = " + this.isValid());
         return super.onLoop();
     }
 
@@ -34,11 +39,8 @@ public class CombatBranch extends Branch implements UtilityMethods {
         if (!hasFood()) {
             return false;
         }
-        if (!hasCorrectEquipment()) {
-            return false;
-        }
         if ((Players.all().stream().anyMatch(this::isPlayerKiller))) return false;
         if (Config.INSTANCE.getTrainingArea().contains(getMyTile()) && Players.all().size() >= 3) return false;
-        return (Config.INSTANCE.getTrainingArea().contains(getMyTile()) || !getNearbyDragons().isEmpty() && Players.all().stream().noneMatch(p -> getLevelDifference(p) && isPlayerKiller(p)));
+        return (Config.INSTANCE.getTrainingArea().contains(getMyTile()) &&  Players.all().stream().noneMatch(p -> getLevelDifference(p) && isPlayerKiller(p))) && Players.all().size() <= 3;
     }
 }

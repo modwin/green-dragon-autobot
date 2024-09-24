@@ -25,20 +25,17 @@ public class AttackDragonLeaf extends Leaf implements UtilityMethods, SimulateHu
     @Override
     public boolean isValid() {
         boolean lootAvailable = GroundItems.all().stream().anyMatch(i -> (((getLocal().getSurroundingArea(7).contains(i.getTile())) && LivePrices.get(i.getItem()) > 1300 || i.getName().equals("Looting bag"))));
-
-        return getLocal().getHealthPercent() >= 40 && !lootAvailable;
+        return getHealthPercent() >= 50 && !lootAvailable;
     }
 
     @Override
     public int onLoop() {
-        if(random(1, 6) == 1)
-            generateRandomBehaviour();
+        generateRandomBehaviour();
         drinkPotion();
         NPC npc = NPCs.closest("Green dragon");;
         if (npc != null && !npc.isInteractedWith() && !Players.getLocal().isInCombat() && npc.getName().equalsIgnoreCase("Green dragon")) {
             sleepUntil(this::attackClosestDragon, Calculations.random(300, 500), 300);
         }
-//        if(dragon != null && dragon.getHealthPercent() == 0) attackSelectedNpc(dragon);
         return random(500, 1000);
     }
     private boolean attackSelectedNpc(NPC npc) {

@@ -16,8 +16,7 @@ import static org.dreambot.api.utilities.Sleep.sleepUntil;
 public class EatFoodLeaf extends Leaf implements UtilityMethods {
     @Override
     public boolean isValid() {
-        log("L0l EatFoodLeaf.isValid()" + (Players.getLocal().getHealthPercent() < random(45, 65)));
-        return Players.getLocal().getHealthPercent() <= random( 45, 65);
+        return getHealthPercent() <= random( 70, 85);
     }
 
     @Override
@@ -28,7 +27,7 @@ public class EatFoodLeaf extends Leaf implements UtilityMethods {
     }
 
 
-    public static boolean eatFood() {
+    public static void eatFood() {
         sleepUntil(() -> {
             if (Inventory.contains(Config.INSTANCE.getFood())){
                 Objects.requireNonNull(Inventory.get(Config.INSTANCE.getFood())).interact("Eat");
@@ -36,7 +35,6 @@ public class EatFoodLeaf extends Leaf implements UtilityMethods {
             }
             return false;
         }, () -> Players.getLocal().getHealthPercent() >= Calculations.random(80, 100), Calculations.random(800, 1500), Calculations.random(600, 900));
-        return true;
     }
 }
 

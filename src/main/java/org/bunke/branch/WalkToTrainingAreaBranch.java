@@ -6,6 +6,7 @@ import org.bunke.util.UtilityMethods;
 import org.bunke.util.cfg.Config;
 import org.dreambot.api.methods.container.impl.bank.BankLocation;
 import org.dreambot.api.methods.walking.impl.Walking;
+import org.dreambot.api.script.ScriptManager;
 import org.dreambot.api.script.frameworks.treebranch.Branch;
 
 import static org.dreambot.api.methods.Randoms.random;
@@ -16,18 +17,16 @@ public class WalkToTrainingAreaBranch extends Branch implements UtilityMethods, 
     public WalkToTrainingAreaBranch(){
         addLeaves(new WalkToTrainingAreaLeaf());
     }
+
     @Override
     public boolean isValid() {
-        log("!Config.INSTANCE.getTrainingArea().contains(getMyTile()) && hasFood() && getNearbyDragons().isEmpty()");
+//        return hasFood() && !super.getTree().getCurrentState().equals(ScriptManager.State.RUNNING) && !getNearbyDragons().isEmpty();
         return !Config.INSTANCE.getTrainingArea().contains(getMyTile()) && hasCorrectInventorySetup() && getNearbyDragons().isEmpty();
     }
 
     @Override
     public int onLoop(){
         generateRandomBehaviour();
-        sleepUntil(() -> Walking.walk(Config.INSTANCE.getTrainingArea()), () -> Config.INSTANCE.getTrainingArea().contains(getMyTile())
-                ,random(1200, 25000)
-                , random(2000, 4000));
-        return random(800, 1550);
+        return super.onLoop();
     }
 }

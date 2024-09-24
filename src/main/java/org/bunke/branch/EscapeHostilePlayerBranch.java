@@ -3,10 +3,15 @@ package org.bunke.branch;
 import org.bunke.leaf.EscapeAttackingPlayerLeaf;
 import org.bunke.util.UtilityMethods;
 import org.dreambot.api.methods.Calculations;
+import org.dreambot.api.methods.container.impl.bank.BankLocation;
 import org.dreambot.api.methods.interactive.Players;
+import org.dreambot.api.methods.walking.impl.Walking;
+import org.dreambot.api.methods.worldhopper.WorldHopper;
 import org.dreambot.api.script.frameworks.treebranch.Branch;
 
 import java.util.stream.Collectors;
+
+import static org.dreambot.api.methods.Calculations.random;
 
 public class EscapeHostilePlayerBranch extends Branch implements UtilityMethods {
 
@@ -22,6 +27,7 @@ public class EscapeHostilePlayerBranch extends Branch implements UtilityMethods 
 
     @Override
     public int onLoop() {
-        return Calculations.random(500, 1000);
+
+        return super.onLoop();
     }
 }
