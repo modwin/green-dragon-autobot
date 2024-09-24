@@ -1,5 +1,6 @@
 package org.bunke.util;
 
+import org.bunke.util.cfg.Config;
 import org.dreambot.api.methods.container.impl.Inventory;
 import org.dreambot.api.methods.container.impl.bank.Bank;
 import org.dreambot.api.methods.grandexchange.LivePrices;
@@ -115,7 +116,7 @@ public interface UtilityMethods {
         List<Item> inventoryItems = Inventory.all();
         inventoryItems.forEach(i -> {
             if (i != null) {
-                if (i.getName().equals("Lobster")) {
+                if (i.getName().equals(Config.INSTANCE.getFood())) {
                     foodCount[0]++;
                 }
                 }});

@@ -1,5 +1,6 @@
 package org.bunke.leaf;
 
+import org.bunke.util.SimulateHumanBehaviour;
 import org.bunke.util.UtilityMethods;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.container.impl.Inventory;
@@ -20,7 +21,7 @@ import static org.dreambot.api.utilities.Logger.log;
 import static org.dreambot.api.utilities.Sleep.sleep;
 import static org.dreambot.api.utilities.Sleep.sleepUntil;
 
-public class AttackDragonLeaf extends Leaf implements UtilityMethods {
+public class AttackDragonLeaf extends Leaf implements UtilityMethods, SimulateHumanBehaviour {
     @Override
     public boolean isValid() {
         boolean lootAvailable = GroundItems.all().stream().anyMatch(i -> (((getLocal().getSurroundingArea(7).contains(i.getTile())) && LivePrices.get(i.getItem()) > 1300 || i.getName().equals("Looting bag"))));
@@ -30,6 +31,8 @@ public class AttackDragonLeaf extends Leaf implements UtilityMethods {
 
     @Override
     public int onLoop() {
+        if(random(1, 6) == 1)
+            generateRandomBehaviour();
         drinkPotion();
         NPC npc = NPCs.closest("Green dragon");;
         if (npc != null && !npc.isInteractedWith() && !Players.getLocal().isInCombat() && npc.getName().equalsIgnoreCase("Green dragon")) {

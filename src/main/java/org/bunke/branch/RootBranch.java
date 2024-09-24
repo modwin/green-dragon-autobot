@@ -16,7 +16,6 @@ public class RootBranch extends Branch {
                 new CombatBranch(),
                 new WalkToTrainingAreaBranch(),
                 new     BankLeaf(),
-                new AntiBanLeaf(),
                 new EscapeHostilePlayerBranch()
         );
 

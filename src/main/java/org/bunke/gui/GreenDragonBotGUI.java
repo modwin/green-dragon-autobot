@@ -13,7 +13,7 @@ public class GreenDragonBotGUI {
     private final JTextField potionAmountField;
     private final JComboBox<String> foodComboBox;
     private final JTextField foodAmountField;
-    private final JComboBox<String> combatStyleComboBox;
+    private final JComboBox<String> attackStyleComboBox;
 
     // Constructor for GUI
     public GreenDragonBotGUI() {
@@ -26,7 +26,7 @@ public class GreenDragonBotGUI {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Layout Setup
-        frame.setLayout(new GridLayout(5, 2));
+        frame.setLayout(new GridLayout(6, 2));
 
         // Potion Setup
         JLabel potionLabel = new JLabel("Choose Potion:");
@@ -36,14 +36,14 @@ public class GreenDragonBotGUI {
 
         // Food Setup
         JLabel foodLabel = new JLabel("Choose Food:");
-        String[] foods = {"Lobster", "Shark", "Swordfish"};
+        String[] foods = {"Lobster", "Shark", "Swordfish", "Monkfish", "Bass"};
         foodComboBox = new JComboBox<>(foods);
         foodAmountField = new JTextField("0");
 
         // Combat Style Setup
-        JLabel combatStyleLabel = new JLabel("Choose Combat Style:");
-        String[] combatStyles = {"Melee", "Range", "Magic"};
-        combatStyleComboBox = new JComboBox<>(combatStyles);
+        JLabel combatStyleLabel = new JLabel("Choose Attack Style:");
+        String[] combatStyles = {"Attack", "Strength", "Shared","Defense"};
+        attackStyleComboBox = new JComboBox<>(combatStyles);
 
         // Confirm Button
         JButton confirmButton = new JButton("Confirm");
@@ -53,7 +53,7 @@ public class GreenDragonBotGUI {
             Config.INSTANCE.setPotionAmount(Integer.parseInt(potionAmountField.getText()));
             Config.INSTANCE.setFood((String) foodComboBox.getSelectedItem());
             Config.INSTANCE.setFoodAmount(Integer.parseInt(foodAmountField.getText()));
-            Config.INSTANCE.setCombatStyle((String) combatStyleComboBox.getSelectedItem());
+            Config.INSTANCE.setAttackStyle((String) attackStyleComboBox.getSelectedItem());
 
             JOptionPane.showMessageDialog(frame, "Settings Saved Successfully!");
         });
@@ -68,7 +68,7 @@ public class GreenDragonBotGUI {
         frame.add(new JLabel("Food Amount:"));
         frame.add(foodAmountField);
         frame.add(combatStyleLabel);
-        frame.add(combatStyleComboBox);
+        frame.add(attackStyleComboBox);
         frame.add(confirmButton);
 
         frame.setVisible(true);
@@ -77,6 +77,7 @@ public class GreenDragonBotGUI {
 
     // Static method to check if the GUI has been initialized
     public static boolean isInitialized() {
+        isInitialized = Config.INSTANCE.getFood() != null;
         return isInitialized;
     }
 

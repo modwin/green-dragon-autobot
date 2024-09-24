@@ -23,11 +23,7 @@ import static org.dreambot.api.utilities.Sleep.sleepUntil;
 public class BankLeaf extends Leaf implements UtilityMethods {
     @Override
     public boolean isValid() {
-//        log("BankLeaf = " + (!hasFood() || !hasCorrectEquipment() || computeLootValue() > 50000));
-//        log("condition 2 = " + (hasCorrectInventorySetup() && getMyTile().canReach(BankLocation.getNearest().getTile())));
-//        log("!hasCorrectInventorySetup() = " + ((!hasCorrectInventorySetup())));
-        log("BankLeaf.hasCorrectInventorySetup() = " + hasCorrectInventorySetup());
-// || (!hasCorrectInventorySetup() && getMyTile().canReach(BankLocation.getNearest().getTile())
+
         return !hasFood() || !hasCorrectEquipment() || !Config.INSTANCE.getTrainingArea().contains(getMyTile()) &&  !hasCorrectInventorySetup() ;
     }
 
@@ -36,8 +32,6 @@ public class BankLeaf extends Leaf implements UtilityMethods {
 
         Item lootingBag = getLootingBag();
         Set<String> equipment = new HashSet<>(Arrays.asList("Rune platebody", "Dragon sword", "Amulet of strength", "Climbing boots", "Adamant platelegs", "Anti-dragon shield", "Adamant full helm"));
-        log("!hasCorrectEquipment()" + !hasCorrectEquipment());
-        log("!getInventorySet().containsAll() = " + !getInventorySet().containsAll(equipment));
         if(!getInventorySet().containsAll(equipment) && !hasCorrectEquipment()){
             withdrawLoadout();
             sleep(random(400, 1200));
@@ -49,8 +43,7 @@ public class BankLeaf extends Leaf implements UtilityMethods {
             sleep(random(400, 1200));
             return random(600, 1000);
         }
-        log("!assertLootingBag....."+  !assertLootingBagClosed());
-        log("L0l = " + (!hasNoLootInInventory() && Bank.open() && lootingBag.hasAction("View")));
+
         if(!hasNoLootInInventory() && Bank.open() && !assertLootingBagClosed()){
             if (depositAllLoot()) {
                 sleep(random(800, 1500));
@@ -66,7 +59,8 @@ public class BankLeaf extends Leaf implements UtilityMethods {
 
                 sleep(random(400, 800));
 
-                Bank.withdraw(i -> i != null && i.getName().matches("^Burning amulet\\W[1-5]\\W$"));
+                if(!Inventory.contains(i -> i.getName().matches("^Burning amulet\\W[1-5]\\W$")))
+                    Bank.withdraw(i -> i != null && i.getName().matches("^Burning amulet\\W[1-5]\\W$"));
 
                 sleep(random(400, 800));
 
@@ -74,9 +68,8 @@ public class BankLeaf extends Leaf implements UtilityMethods {
                 sleep(random(400, 800));
                 Bank.withdraw("Looting bag");
                 sleep(random(400, 800));
-                Bank.withdrawAll("Lobster");
+                Bank.withdrawAll(Config.INSTANCE.getFood());
         }
-        log("onLoop() BankLeaf!!");
         return random(500, 1000);
     }
 //    private boolean lootingBagIsEmpty(){
@@ -91,11 +84,7 @@ public class BankLeaf extends Leaf implements UtilityMethods {
         Widget widget = Widgets.getWidget(15);;
         WidgetChild child = null;
         if(widget != null) {
-            log("Widget.getActions()");
             child = widget.getChild(6);
-        }
-        if(child != null) {
-            log("WidgetChild.getActions = " + Arrays.toString(child.getActions()));
         }
         return child;
     }
@@ -107,7 +96,6 @@ public class BankLeaf extends Leaf implements UtilityMethods {
         if (Inventory.size() > 1) {
             Bank.depositAllExcept("Looting bag");
         }
-        log("depositAllLootingbagItems()");
         WidgetChild c = getLootingBagDepositAllWidget();
         Item lootingBag = getLootingBag();
         ;

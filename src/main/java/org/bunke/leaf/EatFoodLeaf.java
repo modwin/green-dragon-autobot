@@ -1,6 +1,7 @@
 package org.bunke.leaf;
 
 import org.bunke.util.UtilityMethods;
+import org.bunke.util.cfg.Config;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.container.impl.Inventory;
 import org.dreambot.api.methods.interactive.Players;
@@ -29,8 +30,8 @@ public class EatFoodLeaf extends Leaf implements UtilityMethods {
 
     public static boolean eatFood() {
         sleepUntil(() -> {
-            if (Inventory.contains("Lobster")){
-                Objects.requireNonNull(Inventory.get("Lobster")).interact("Eat");
+            if (Inventory.contains(Config.INSTANCE.getFood())){
+                Objects.requireNonNull(Inventory.get(Config.INSTANCE.getFood())).interact("Eat");
                 return true;
             }
             return false;

@@ -17,7 +17,7 @@ public class Config {
     private Category category;
     private String potion;
     private String food;
-    private String combatStyle;
+    private String attackStyle;
     private Area trainingArea;
 
     private Config() {
