@@ -1,43 +1,24 @@
 package org.bunke;
 
 
-import com.google.common.base.Supplier;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.bunke.branch.RootBranch;
 import org.bunke.gui.GreenDragonBotGUI;
-import org.bunke.leaf.LootLeaf;
-import org.bunke.util.ScriptPaint;
 import org.bunke.util.cfg.Config;
 import org.dreambot.api.methods.combat.Combat;
 import org.dreambot.api.methods.combat.CombatStyle;
-import org.dreambot.api.methods.container.impl.Inventory;
-import org.dreambot.api.methods.grandexchange.LivePrices;
-import org.dreambot.api.methods.interactive.Players;
-import org.dreambot.api.methods.item.GroundItems;
 import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.methods.skills.SkillTracker;
-import org.dreambot.api.methods.tabs.Tab;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
-import org.dreambot.api.script.event.impl.GroundItemSpawnEvent;
-import org.dreambot.api.script.event.impl.InventoryItemEvent;
-import org.dreambot.api.script.event.impl.SpawnEvent;
-import org.dreambot.api.script.frameworks.treebranch.Root;
 import org.dreambot.api.script.frameworks.treebranch.TreeScript;
-import org.dreambot.api.script.listener.ItemContainerListener;
 import org.dreambot.api.script.listener.PaintListener;
-import org.dreambot.api.utilities.Timer;
-import org.dreambot.api.wrappers.items.GroundItem;
-import org.dreambot.api.wrappers.items.Item;
-import org.dreambot.api.wrappers.widgets.WidgetChild;
 
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
 
 @EqualsAndHashCode(callSuper = true)
 @ScriptManifest(name = "Bunkebot Green dragon slayer", version = 1.0, category = Category.COMBAT,
@@ -48,13 +29,9 @@ public class Main extends TreeScript implements PaintListener {
 
     @Override
     public void onPaint(Graphics graphics) {
-        String branch = getCurrentBranchName();
-        String leaf = getCurrentLeafName();
-        String thread;
         Skill skillTrained = getSkillTrained();
         if(skillTrained != null && getSkillTrained() == skillTrained){
             graphics.drawString(getCurrentLeafName(), 25 , 36);
-//            new ScriptPaint().onPaint(graphics);
             graphics.drawString(skillTrained.name() + " XP/HR  =  " + SkillTracker.getGainedExperiencePerHour(getSkillTrained()), 27, 55);
         }
     }
@@ -64,7 +41,7 @@ public class Main extends TreeScript implements PaintListener {
         try {
             SkillTracker.start(Skill.STRENGTH, Skill.RANGED, Skill.ATTACK, Skill.DEFENCE, Skill.HITPOINTS);
             SwingUtilities.invokeAndWait(GreenDragonBotGUI::initialize);
-            Root root = getRoot().addBranches(new RootBranch());
+            getRoot().addBranches(new RootBranch());
         } catch (InterruptedException | InvocationTargetException e) {
             log(e.getCause());
             throw new RuntimeException(e);
@@ -72,7 +49,6 @@ public class Main extends TreeScript implements PaintListener {
     }
 
     private void setCombatStyle() {
-        CombatStyle current = Combat.getCombatStyle();
         if (Config.INSTANCE.getAttackStyle() != null) {
             switch (Config.INSTANCE.getAttackStyle()) {
                 case "Attack": {
@@ -104,13 +80,11 @@ public class Main extends TreeScript implements PaintListener {
     public int onLoop(){
 
         if(Config.INSTANCE.getFoodAmount() == 0) Config.INSTANCE.setFoodAmount(23);
-        CombatStyle cs = Combat.getCombatStyle();
         if(Config.INSTANCE.getAttackStyle() != null){
             setCombatStyle();
         }
-        String leaf = getCurrentLeafName();
-//        if(leaf != null && leaf.equals("LootLeaf"))
-//            trackLoot();
+//        String leafName = getCurrentLeafName();
+//        if(leafName != null && leafName.equals("LootLeaf"));
         return getRoot().onLoop();
     }
 
