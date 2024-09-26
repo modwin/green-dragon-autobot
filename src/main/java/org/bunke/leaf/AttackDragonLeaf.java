@@ -17,26 +17,31 @@ import org.dreambot.api.wrappers.interactive.NPC;
 import java.util.Objects;
 
 import static org.dreambot.api.methods.Calculations.random;
-import static org.dreambot.api.utilities.Logger.log;
-import static org.dreambot.api.utilities.Sleep.sleep;
 import static org.dreambot.api.utilities.Sleep.sleepUntil;
 
 public class AttackDragonLeaf extends Leaf implements UtilityMethods, SimulateHumanBehaviour {
     @Override
     public boolean isValid() {
-        boolean lootAvailable = GroundItems.all().stream().anyMatch(i -> (((getLocal().getSurroundingArea(7).contains(i.getTile())) && LivePrices.get(i.getItem()) > 1300 || i.getName().equals("Looting bag"))));
+        boolean lootAvailable = GroundItems.all().stream().anyMatch(i -> (((getLocal().getSurroundingArea(15).contains(i.getTile())) && LivePrices.get(i.getItem()) > 1300 || i.getName().equals("Looting bag"))));
         return getHealthPercent() >= 50 && !lootAvailable;
     }
 
     @Override
     public int onLoop() {
-        generateRandomBehaviour();
+        if(getLocal().isInteractedWith()){
+            generateRandomBehaviour();
+        }
         drinkPotion();
+        NPC dragonAttackingMe = getDragonInteractedWith();
+        if(dragonAttackingMe != null && dragonAttackingMe.isInteracting(getLocal()) && !getLocal().isInteracting(dragonAttackingMe)) {
+            dragonAttackingMe.interact("Attack");
+            return random(300, 700);
+        }
         NPC npc = NPCs.closest("Green dragon");;
-        if (npc != null && !npc.isInteractedWith() && !Players.getLocal().isInCombat() && npc.getName().equalsIgnoreCase("Green dragon")) {
+        if (!Players.getLocal().isInCombat() && npc != null && !npc.isInteractedWith() &&  npc.getName().equalsIgnoreCase("Green dragon")) {
             sleepUntil(this::attackClosestDragon, Calculations.random(300, 500), 300);
         }
-        return random(500, 1000);
+        return random(300, 600);
     }
     private boolean attackSelectedNpc(NPC npc) {
         Camera.rotateToEntity(npc);

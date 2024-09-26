@@ -1,6 +1,5 @@
 package org.bunke.util.cfg;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.script.Category;
@@ -21,6 +20,6 @@ public class Config {
     private Area trainingArea;
 
     private Config() {
-        setTrainingArea(new Area(2966, 3623, 2988, 3606));
+        setTrainingArea(new Area(2971, 3621, 2983, 3611));
     }
 }

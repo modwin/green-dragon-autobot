@@ -3,7 +3,6 @@ package org.bunke.leaf;
 import org.bunke.Main;
 import org.bunke.util.UtilityMethods;
 import org.bunke.util.cfg.Config;
-import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.container.impl.Inventory;
 import org.dreambot.api.methods.grandexchange.LivePrices;
 import org.dreambot.api.methods.interactive.Players;
@@ -15,11 +14,9 @@ import org.dreambot.api.wrappers.items.GroundItem;
 import org.dreambot.api.wrappers.items.Item;
 
 import java.util.HashSet;
-import java.util.Objects;
 
 import static org.dreambot.api.methods.Calculations.random;
 import static org.dreambot.api.utilities.Logger.log;
-import static org.dreambot.api.utilities.Sleep.sleep;
 import static org.dreambot.api.utilities.Sleep.sleepUntil;
 public class LootLeaf extends Leaf implements UtilityMethods , PaintListener {
 
@@ -28,31 +25,43 @@ public class LootLeaf extends Leaf implements UtilityMethods , PaintListener {
     private final HashSet<GroundItem> items = new HashSet<>();
     @Override
     public boolean isValid() {
-        GroundItems.all().stream().filter(i -> (((Players.getLocal().getSurroundingArea(10).contains(i.getTile())) && LivePrices.get(i.getItem()) > 1300 || i.getName().equals("Looting bag"))
-                && (Players.getLocal().getSurroundingArea(10).contains(i.getTile()))))
+
+        if(isPlayerKillerNearby())
+            return false;
+
+        GroundItems.all().stream().filter(i -> (((Players.getLocal().getSurroundingArea(15).contains(i.getTile())) && LivePrices.get(i.getItem()) > 1300 || i.getName().equals("Looting bag"))
+                && (Players.getLocal().getSurroundingArea(15).contains(i.getTile()))))
                 .distinct()
                 .forEach(items::add);
-        return !items.isEmpty() &&
-                getLocal().getHealthPercent() > 50;
+
+        if(getHealthPercent() < 50) return false;
+        return !items.isEmpty();
     }
 
     @Override
     public int onLoop() {
-        if(openLootingBag()){
-                return random(600, 1000);
+        if(assertLootingBagIsClosed() && openLootingBag()){
+                return random(300, 600);
         }
-        Sleep.sleepUntil(this::lootItems, Calculations.random(500, 800), 600);
-        sleep(random(600, 1000));
-        return random(600, 1000);
+        Sleep.sleepUntil(this::lootItems, 300, 300);
+        return random(200, 400);
     }
 
     private boolean lootItems() {
         if (!items.isEmpty()) {
-            dropIfFullInventory();
+
+            if(Inventory.isFull())
+                dropIfFullInventory();
+
             items.forEach(i -> {
                 i.interact("Take");
-                sleepUntil(() -> !i.exists(), random(5000, 7000),random(800, 1200));
-                profitTracker += LivePrices.get(i.getItem());
+
+                sleepUntil(() ->{
+                    items.removeIf(item -> !item.exists());
+                    return !i.exists();
+                } , random(300, 600),random(600, 800));
+                if(!i.exists())
+                    profitTracker += LivePrices.get(i.getItem());
             });
         }
         Object o = getTree();
@@ -60,24 +69,24 @@ public class LootLeaf extends Leaf implements UtilityMethods , PaintListener {
             ((Main) o).setLootTracker(profitTracker);
 
         items.clear();
+
         return true;
     }
     private void dropIfFullInventory() {
         Item food = Inventory.get(Config.INSTANCE.getFood());
-        if (Inventory.isFull() && !items.isEmpty() && Inventory.contains(Config.INSTANCE.getFood()) && food != null) {
-            Inventory.all().stream().filter(Objects::nonNull).forEach(item -> {
-                if (!item.getName().equals(Config.INSTANCE.getFood()) && !item.hasAction("Drink") && !item.hasAction("Rub") && LivePrices.get(item) <= 100) {
-                    log("Dropping unwanted item = " + Objects.requireNonNull(item).getName());
-                    item.interact("Drop");
-                    sleep(Calculations.random(800, 1300));
-                }
-            });
-            if (Inventory.isFull()) {
-                log("Eating or dropping food to pick up loot...");
-                food.interact("Eat");
+        String regexPattern = "(^\\w*\\W*potion\\W[1234]\\W$)|(^\\w*\\W*Teleport$)|(^\\w*\\W*amulet\\W[12345]\\W$)|(^Looting bag$)|(^";
+        Inventory.all().stream().filter(item -> item != null &&
+                !item.getName().matches(regexPattern + Config.INSTANCE.getFood()+")$") && LivePrices.get(item) < 200)
+                .distinct()
+                .findAny()
+                .ifPresent(i -> i.interact("Drop"));
+        if (food != null) {
+            log("Eating or dropping inventory item to pick up loot...");
+            food.interact("Eat");
 
-            }
+            Inventory.all(i -> i != null && i.getName().equals(Config.INSTANCE.getFood())).get(0).interact("Eat");
         }
+
     }
 
 }

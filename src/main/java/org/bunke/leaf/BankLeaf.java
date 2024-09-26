@@ -4,6 +4,7 @@ import org.bunke.util.UtilityMethods;
 import org.bunke.util.cfg.Config;
 import org.dreambot.api.methods.container.impl.Inventory;
 import org.dreambot.api.methods.container.impl.bank.Bank;
+import org.dreambot.api.methods.container.impl.bank.BankLocation;
 import org.dreambot.api.methods.widget.Widget;
 import org.dreambot.api.methods.widget.Widgets;
 import org.dreambot.api.script.frameworks.treebranch.Leaf;
@@ -11,24 +12,28 @@ import org.dreambot.api.wrappers.items.Item;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
 
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.dreambot.api.methods.Calculations.random;
-import static org.dreambot.api.utilities.Logger.log;
 import static org.dreambot.api.utilities.Sleep.sleep;
 import static org.dreambot.api.utilities.Sleep.sleepUntil;
 
 public class BankLeaf extends Leaf implements UtilityMethods {
+
     @Override
     public boolean isValid() {
 
-        return !hasFood() && getHealthPercent() <= 85 || !hasCorrectEquipment() || !Config.INSTANCE.getTrainingArea().contains(getMyTile()) && !hasCorrectInventorySetup();
+        if(isPlayerKillerNearby())
+            return false;
+        return !hasFood() || !hasCorrectEquipment() && !getMyTile().canReach(BankLocation.getNearest().getTile());
+
     }
 
     @Override
     public int onLoop() {
 
-        Set<String> equipment = new HashSet<>(Arrays.asList("Rune platebody", "Dragon sword", "Amulet of strength", "Climbing boots", "Adamant platelegs", "Anti-dragon shield", "Adamant full helm"));
+        Set<String> equipment = new HashSet<>(Arrays.asList("Rune platebody", "Abyssal whip", "Amulet of strength", "Climbing boots", "Adamant platelegs", "Anti-dragon shield", "Adamant full helm"));
         if (!getInventorySet().containsAll(equipment) && !hasCorrectEquipment()) {
             withdrawLoadout();
             sleep(random(400, 1200));
@@ -41,28 +46,17 @@ public class BankLeaf extends Leaf implements UtilityMethods {
             return random(600, 1000);
         }
 
-
-        if(!assertLootingBagClosed() || hasLootInInventory()){
-            log("L0l condition 3, 1");
-            if(Bank.open() &&  Bank.depositAllExcept("Looting bag") && depositAllLoot()){
-                return random(600, 1000);
+        if (Inventory.contains("Looting bag") && !assertLootingBagIsClosed() || hasUndesiredItems()) {
+            if (Bank.open() &&  Bank.depositAllExcept("Looting bag") && depositAllLoot()) {
+                if(!Bank.contains("Looting bag"))
+                    return random(600, 1000);
             }
             closeLootingBag();
-        }
+        }else if(!Inventory.contains("Looting bag") && !Inventory.isEmpty() && Bank.depositAllItems())
 
 
 
-
-//        if (Bank.open()) {
-//            if (depositAllLoot())
-//                return random(600, 1000);
-//            if(!assertLootingBagClosed() && closeLootingBag()){
-//                sleep(random(800, 1500));
-//                return random(600, 1000);
-//            }
-//        }
-//        log("condition 4 = " + (!hasCorrectInventorySetup()));
-        if (Bank.open() && !hasCorrectInventorySetup() && assertLootingBagClosed()) {
+        if (Bank.open() && !hasCorrectInventorySetup()) {
             sleep(random(400, 800));
             if (!Inventory.contains("Combat potion(4)"))
                 Bank.withdraw(i -> i.getName().matches("^Combat potion\\W4\\W$"), Config.INSTANCE.getPotionAmount());
@@ -72,15 +66,16 @@ public class BankLeaf extends Leaf implements UtilityMethods {
             if (!Inventory.contains(i -> i.getName().matches("^Burning amulet\\W[1-5]\\W$")))
                 Bank.withdraw(i -> i != null && i.getName().matches("^Burning amulet\\W[1-5]\\W$"));
 
-            if(!Inventory.contains("("+Config.INSTANCE.getFood() + ")|^Falador Teleport$")){
-                Bank.withdraw("Falador Teleport");
-                sleep(random(400, 800));
+            if (!Inventory.contains("Falador Teleport")) Bank.withdraw("Falador Teleport");
+
+            sleep(random(400, 800));
+            if(!Inventory.contains(Config.INSTANCE.getFood()))
                 Bank.withdraw(Config.INSTANCE.getFood(), Config.INSTANCE.getFoodAmount());
-                sleep(random(400, 800));
+            else if(Bank.withdraw(Config.INSTANCE.getFood(), Inventory.count(Config.INSTANCE.getFood()) - Config.INSTANCE.getFoodAmount()))
+            sleep(random(400, 800));
 
-            }
 
-            if(!Inventory.contains("Looting bag")) {
+            if (!Inventory.contains("Looting bag")) {
                 Bank.withdraw("Looting bag");
                 sleep(random(400, 800));
             }
@@ -111,7 +106,7 @@ public class BankLeaf extends Leaf implements UtilityMethods {
     private boolean depositAllLoot() {
         if (!Inventory.contains("Looting bag") && !Bank.contains("Looting bag")) return true;
         Item lootingBag = getLootingBag();
-        return lootingBag.interact("View") && getLootingBagWidgets().get(0).interact("Deposit loot");
+        return lootingBag != null && lootingBag.interact("View") && getLootingBagWidgets().get(0).interact("Deposit loot");
     }
 
 
@@ -126,7 +121,7 @@ public class BankLeaf extends Leaf implements UtilityMethods {
 
     private void withdrawLoadout() {
         if (!Bank.isOpen()) Bank.open();
-        Set<String> equipment = new HashSet<>(Arrays.asList("Rune platebody", "Dragon sword", "Amulet of strength", "Climbing boots", "Adamant platelegs", "Anti-dragon shield", "Adamant full helm"));
+        Set<String> equipment = new HashSet<>(Arrays.asList("Rune platebody", "Black cape","Abyssal whip", "Amulet of strength", "Climbing boots", "Adamant platelegs", "Anti-dragon shield", "Adamant full helm"));
         Bank.all().stream().filter(Objects::nonNull).filter(i -> !Inventory.contains(i) && equipment.contains(i.getName()) || i.getName().matches("^Ring of wealth\\W[1234]\\W")).distinct().collect(Collectors.toList()).forEach(i -> sleepUntil(() -> Bank.withdraw(i != null ? i.getName() : null), random(400, 800)));
         equipItems();
     }

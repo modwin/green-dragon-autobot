@@ -6,21 +6,21 @@ import org.dreambot.api.methods.walking.impl.Walking;
 import org.dreambot.api.methods.worldhopper.WorldHopper;
 import org.dreambot.api.script.ScriptManager;
 import org.dreambot.api.script.frameworks.treebranch.Leaf;
-import org.dreambot.api.wrappers.interactive.Character;
-import org.dreambot.api.wrappers.interactive.Player;
 
 import static org.dreambot.api.methods.Calculations.random;
 
 public class EscapeAttackingPlayerLeaf extends Leaf implements UtilityMethods {
 
+
     @Override
     public boolean isValid() {
-        Character c = getCharacterInteracting();
-        return c instanceof Player;
+        return true;
     }
 
     @Override
     public int onLoop() {
+
+
         super.getTree().setState(ScriptManager.State.RUNNING);
         Walking.walk(BankLocation.getNearest());
         WorldHopper.hopWorld(random(505, 525));

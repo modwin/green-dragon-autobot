@@ -2,19 +2,27 @@ package org.bunke.branch;
 
 import org.bunke.leaf.EscapeAttackingPlayerLeaf;
 import org.bunke.util.UtilityMethods;
-import org.dreambot.api.methods.Calculations;
-import org.dreambot.api.methods.container.impl.bank.BankLocation;
-import org.dreambot.api.methods.interactive.Players;
-import org.dreambot.api.methods.walking.impl.Walking;
-import org.dreambot.api.methods.worldhopper.WorldHopper;
 import org.dreambot.api.script.frameworks.treebranch.Branch;
 
-import java.util.stream.Collectors;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-import static org.dreambot.api.methods.Calculations.random;
 
 public class EscapeHostilePlayerBranch extends Branch implements UtilityMethods {
+    private static final Robot ROBOT;
 
+    static{
+        try {
+            ROBOT = new Robot();
+        } catch (AWTException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public EscapeHostilePlayerBranch(){
         addLeaves(
                 new EscapeAttackingPlayerLeaf()
@@ -22,12 +30,21 @@ public class EscapeHostilePlayerBranch extends Branch implements UtilityMethods 
     }
     @Override
     public boolean isValid() {
-        return Players.all().stream().anyMatch(p -> getLevelDifference(p) && isPlayerKiller(p));
+        return isPlayerKillerNearby();
     }
 
     @Override
     public int onLoop() {
 
+        Rectangle rectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        BufferedImage screen = ROBOT.createScreenCapture(rectangle);
+
+        try {
+            ImageIO.write(screen, "jpg", new File("C:\\Users\\komvu\\DreamBot\\Green Dragon Screenshots\\",
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss")) + "jpg"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return super.onLoop();
     }
 }

@@ -5,6 +5,8 @@ import org.bunke.util.cfg.Config;
 import javax.swing.*;
 import java.awt.*;
 
+import static org.dreambot.api.utilities.Logger.log;
+
 public class GreenDragonBotGUI {
 
     private static boolean isInitialized = false; // Static flag to check initialization
@@ -83,7 +85,7 @@ public class GreenDragonBotGUI {
     }
 
     public void close(){
-        frame.dispose();;
+        frame.dispose();
     }
 
     // Main method to launch GUI
@@ -91,7 +93,7 @@ public class GreenDragonBotGUI {
         if (!isInitialized) {
             SwingUtilities.invokeLater(GreenDragonBotGUI::new);
         } else {
-            System.out.println("The GUI is already initialized.");
+            log("The GUI is already initialized.");
         }
     }
 }

@@ -1,25 +1,29 @@
 package org.bunke.util;
 
 import org.bunke.util.cfg.Config;
+import org.dreambot.api.methods.combat.Combat;
 import org.dreambot.api.methods.container.impl.Inventory;
 import org.dreambot.api.methods.container.impl.bank.Bank;
 import org.dreambot.api.methods.grandexchange.LivePrices;
 import org.dreambot.api.methods.interactive.NPCs;
 import org.dreambot.api.methods.interactive.Players;
 import org.dreambot.api.methods.map.Tile;
+import org.dreambot.api.methods.skills.Skill;
+import org.dreambot.api.methods.skills.SkillTracker;
 import org.dreambot.api.wrappers.interactive.Character;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.interactive.Player;
 import org.dreambot.api.wrappers.items.Item;
 
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.dreambot.api.methods.Calculations.random;
-import static org.dreambot.api.utilities.Logger.log;
 import static org.dreambot.api.utilities.Sleep.sleep;
 
 public interface UtilityMethods {
+
     default boolean hasFood() {
         return Inventory.all().stream().filter(Objects::nonNull).anyMatch(i -> i.hasAction("Eat"));
     }
@@ -31,7 +35,7 @@ public interface UtilityMethods {
     }
 
     default boolean hasCorrectEquipment() {
-        Set<String> equipment = new HashSet<>(Arrays.asList("Rune platebody", "Dragon sword", "Amulet of strength", "Climbing boots", "Adamant platelegs", "Anti-dragon shield", "Adamant full helm"));
+        Set<String> equipment = new HashSet<>(Arrays.asList("Black cape", "Obsidian platebody", "Abyssal whip", "Amulet of strength", "Climbing boots", "Adamant platelegs", "Anti-dragon shield", "Obsidian helmet"));
         Set<String> actualEquipment = new HashSet<>();
         if(!getLocal().getEquipment().isEmpty() && getLocal().getEquipment() != null) {
             for (Item i : getLocal().getEquipment()) {
@@ -69,12 +73,14 @@ public interface UtilityMethods {
     }
 
     default boolean getLevelDifference(Player p) {
+
         int diff = (p.getLevel() - getLocal().getLevel());
-        return diff >= -15 && diff <= 15;
+        if(Combat.getWildernessLevel() == 0) return false;
+        return diff >= -Combat.getWildernessLevel() && diff <= Combat.getWildernessLevel();
     }
 
     default boolean isPlayerKiller(Player p) {
-        return p != null && p.getEquipment().stream().anyMatch(i -> i.getName().matches("bow") || i.getName().matches("[rR]obes?") || i.getName().matches("[sS]taff"));
+        return p != null && (p.getEquipment().stream().anyMatch(i -> i.getName().matches("(^\\w*\\W*bow$)|(^\\w*\\W*[rR]obes?$)|(^(\\w*\\W)*[sS]taff$)")));
     }
 
     default List<NPC> getNearbyDragons() {
@@ -89,7 +95,6 @@ public interface UtilityMethods {
     default boolean attackClosestDragon() {
         Map<Double, NPC> distances = new HashMap<>();
         NPC dragon = NPCs.closest("Green dragon");
-        log("getNearbyDragons().isEmpty() = " + getNearbyDragons().isEmpty() + "getNearbyDragons() innehåll = " + getNearbyDragons().toString());
         if (dragon != null && !(dragon.getInteractingCharacter() instanceof Player) && !dragon.isInteracting(getLocal()) && !dragon.isInCombat())
             return dragon.interact("Attack");
 
@@ -106,13 +111,18 @@ public interface UtilityMethods {
         return lootingBag != null && lootingBag.hasAction("Open") && lootingBag.interact("Open");
     }
 
+    default boolean isPlayerKillerNearby(){
+        return Players.all().stream().anyMatch(p -> getLevelDifference(p) && isPlayerKiller(p)) || getCharacterInteracting() instanceof Player;
+
+    }
+
     default boolean closeLootingBag() {
         sleep(random(800, 1200));
         Item lootingBag = Inventory.get("Looting bag");
         return Bank.close() && lootingBag != null && lootingBag.hasAction("Close") && lootingBag.interact("Close");
     }
 
-    default boolean assertLootingBagClosed() {
+    default boolean assertLootingBagIsClosed() {
         Item lootingBag = Inventory.get("Looting bag");
         return lootingBag != null && lootingBag.getID() == 11941;
     }
@@ -134,12 +144,19 @@ public interface UtilityMethods {
 
     }
 
-    default boolean hasLootInInventory() {
-        return Inventory.all().stream().anyMatch(i -> i != null && (i.getName().equals("Dragon bones") || i.getName().equals("Green dragonhide") || i.getName().matches("Rune dagger")));
+    default boolean hasUndesiredItems() {
+        return !Inventory.all().stream().allMatch(i -> i != null && (i.getName().equals(Config.INSTANCE.getFood()) || i.getName().matches(("(^(\\w*\\W)*potion\\W[1234]\\W$)|^(\\w*\\W*Teleport$)|(^\\w*\\W*amulet\\W[12345]\\W$)|(^Looting bag$)"))));
     }
     default boolean hasLootInLootingBag(){
         Item lootingBag = getLootingBag();
-        log("L0l isBagHolder" + lootingBag.hasAction("View"));
         return lootingBag.interact("View");
+    }
+    default int getSharedXp(Skill... skills){
+        int[] xp = new int[1];
+        for(Skill s : skills){
+            xp[0] += SkillTracker.getGainedExperiencePerHour(s);
+        }
+        return xp[0];
+
     }
 }
